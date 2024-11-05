@@ -34,3 +34,6 @@ Jocul se poate opri oricând cu butonul de start/stop.
 Vă recomandăm să testați întâi funcționalitatea temei într-un simulator, apoi să realizați montajul fizic folosind componentele din kit-urile primite. Pentru simulare puteți folosi Wokwi sau TinkerCAD. Pentru a fi notați, tema voastră TREBUIE să fie realizată fizic, nu doar în simulator!
 
 2.5 Publicarea temei (1p) Codul trebuie să fie încărcat pe github-ul personal, în repo-ul cursului, până în ziua laboratorului vostru din săptămâna 4-8 noiembrie.
+
+Poza
+https://ibb.co/2KZz8gz
