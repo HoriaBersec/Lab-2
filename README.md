@@ -1,5 +1,6 @@
-# Lab-2
-Tema laboratory 2
+# Lab-4
+Tema laboratory 4
+
 Componente Arduino UNO (ATmega328P microcontroller) 1x LED RGB (pentru a semnaliza dacă cuvântul corect e scris greșit sau nu) 2x Butoane (pentru start/stop rundă și pentru selectarea dificultății) 5x Rezistoare (3x 220/330 ohm, 2x 1000 ohm) Breadbord Fire de legătură
 
 Detalii tehnice (1p) LED RGB - Indicator de stare:
