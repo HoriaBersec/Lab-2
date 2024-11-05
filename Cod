@@ -1,0 +1,149 @@
+#include <Arduino.h>
+
+#define BUTTON_START 2          // Pinul pentru butonul de start
+#define BUTTON_DIFFICULTY 3     // Pinul pentru butonul de dificultate
+#define LED_PIN_RED 9           // Pinul pentru LED roșu
+#define LED_PIN_GREEN 10        // Pinul pentru LED verde
+#define LED_PIN_BLUE 11         // Pinul pentru LED albastru
+
+enum Difficulty { EASY, MEDIUM, HARD }; // Enum pentru dificultate
+
+// Variabile globale
+int correctCount = 0;          // Numărul de cuvinte corecte
+String currentWord;            // Cuvântul curent
+bool gameActive = false;       // Starea jocului
+unsigned long gameStartTime;   // Timpul de început al jocului
+unsigned long roundDuration = 30000; // Durata rundei în milisecunde (30 secunde)
+Difficulty currentDifficulty = EASY; // Dificultatea curentă
+
+// Declarații funcții
+void setColor(int red, int green, int blue);
+void showNextWord();
+void toggleGame();
+void startGame();
+void endGame();
+void changeDifficulty();
+void countdown(); // Funcția pentru numărătoare inversă
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(BUTTON_START, INPUT_PULLUP);
+    pinMode(BUTTON_DIFFICULTY, INPUT_PULLUP);
+    pinMode(LED_PIN_RED, OUTPUT);
+    pinMode(LED_PIN_GREEN, OUTPUT);
+    pinMode(LED_PIN_BLUE, OUTPUT);
+    
+    attachInterrupt(digitalPinToInterrupt(BUTTON_START), toggleGame, FALLING);
+    attachInterrupt(digitalPinToInterrupt(BUTTON_DIFFICULTY), changeDifficulty, FALLING);
+    
+    setColor(255, 255, 255); // LED alb (starea de repaus)
+    Serial.println("Apasa butonul de start pentru a incepe.");
+}
+
+void loop() {
+    if (gameActive) {
+        unsigned long currentTime = millis();
+        
+        if (currentTime - gameStartTime >= roundDuration) {
+            endGame();
+        } else {
+            if (Serial.available()) {
+                String inputWord = Serial.readStringUntil('\n');
+                inputWord.trim(); // Elimină spațiile albe
+                
+                // Compară cuvântul introdus cu cel curent
+                if (inputWord.equalsIgnoreCase(currentWord)) { // Comparare insensibilă la caz
+                    correctCount++;
+                    Serial.println("Corect!");
+                    setColor(0, 255, 0); // LED verde
+                    showNextWord();
+                } else {
+                    Serial.println("Greșit! Încearcă din nou.");
+                    setColor(255, 0, 0); // LED roșu
+                }
+            }
+        }
+    }
+}
+
+// Funcția pentru numărătoare inversă
+void countdown() {
+    for (int i = 3; i > 0; i--) {
+        Serial.println(i);
+        setColor(255, 255, 255); // LED alb
+        delay(500);               // LED alb timp de 500 ms
+        setColor(0, 0, 0);       // LED stins
+        delay(500);               // LED stins timp de 500 ms
+    }
+    setColor(0, 255, 0); // LED verde la începutul rundei
+}
+
+// Funcția pentru schimbarea dificultății
+void changeDifficulty() {
+    // Debouncing
+    delay(50); // Delay pentru a evita multiple trigger-uri
+    
+    if (currentDifficulty == HARD) {
+        currentDifficulty = EASY;
+    } else {
+        currentDifficulty = static_cast<Difficulty>(currentDifficulty + 1);
+    }
+    Serial.print("Dificultate setata: ");
+    if (currentDifficulty == EASY) {
+        Serial.println("Usor");
+    } else if (currentDifficulty == MEDIUM) {
+        Serial.println("Mediu");
+    } else {
+        Serial.println("Dificil");
+    }
+}
+
+// Funcția pentru începutul jocului
+void toggleGame() {
+    // Debouncing
+    delay(50); // Delay pentru a evita multiple trigger-uri
+    
+    if (gameActive) {
+        endGame();
+    } else {
+        startGame();
+    }
+}
+
+// Funcția pentru a începe jocul
+void startGame() {
+    correctCount = 0;
+    gameActive = true;
+    gameStartTime = millis();
+    
+    Serial.println("Incepem runda...");
+    countdown(); // Numărătoare inversă
+    showNextWord(); // Afișează primul cuvânt
+}
+
+void endGame() {
+    gameActive = false;
+    setColor(255, 255, 255); // LED alb
+    Serial.print("Runda s-a terminat! Ai scris corect: ");
+    Serial.println(correctCount);
+}
+
+// Funcția pentru a arăta următorul cuvânt
+void showNextWord() {
+    // Exemplu de cuvinte
+    String words[] = {"sah", "aolo", "salut", "aolo", "oaie", "tantar", "branza", "sulfus", "plumbus", "carbonium", "echipament", "copilu", "securitate", "dragoste", "mila", "compasiune", "intelegator",};
+    
+    // Generarea unui cuvânt aleator
+    int randomIndex = random(0, 15);
+    currentWord = words[randomIndex];
+    
+    Serial.print("Scrie cuvantul: ");
+    Serial.println(currentWord);
+}
+
+// Funcția pentru setarea culorii LED-ului
+void setColor(int red, int green, int blue) {
+    analogWrite(LED_PIN_RED, red);
+    analogWrite(LED_PIN_GREEN, green);
+    analogWrite(LED_PIN_BLUE, blue);
+}
